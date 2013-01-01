@@ -50,6 +50,7 @@ You have to:
 
 You should:
   # Name the mocked fields the same as the target field in !TestSubject - injection first tries to wire by name, then by type. Name is faster, but it would be easy to break when refactoring, so by type is there as a back-up
+  # Generally prefer @!NiceMock when supplying indirect inputs, and @!StrictMock when verifying indirect outputs. See XUnit Test Patterns.
 
 You do not have to:
   # Create mocks
