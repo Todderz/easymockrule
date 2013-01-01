@@ -13,7 +13,7 @@ You no longer need to create mocks, inject them into the test subject, or verify
 = Example =
 
 {{{
-    public class SomeTest {
+public class SomeTest {
 
     @Rule
     public EasyMockRule mocks = new EasyMockRule(this);
@@ -43,4 +43,5 @@ You no longer need to create mocks, inject them into the test subject, or verify
 
         // Verify all mocks is done automatically
     }
+}
 }}}
