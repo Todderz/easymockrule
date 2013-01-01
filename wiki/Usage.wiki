@@ -1,8 +1,8 @@
-#summary One-sentence summary of this page.
+#summary Basic usage instructions.
 
 = Introduction =
 
-Add your content here.
+You no longer need to create mocks, inject them into the test subject, or verify them manually.
 
 
 = Details =
