@@ -7,7 +7,40 @@ You no longer need to create mocks, inject them into the test subject, or verify
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+
+
+
+= Example =
+
+{{{
+    public class SomeTest {
+
+    @Rule
+    public EasyMockRule mocks = new EasyMockRule(this);
+
+    @StrictMock
+    public SomeThing aMockedThing;
+
+    @TestSubject
+    public SomeOtherThing theTestSubject;
+
+    @Test
+    public void shouldDoSomething() throws Exception {
+
+        // No need to create mocks
+
+        // No need to set mocks into the test subject
+
+        // Set expectations just like normal
+        expect(aMockedThing.doStuff()).andReturn("stuff").atLeastOnce();
+
+        // Only ever need this one call to replay any mocks in this test class
+        mocks.replayAll();
+
+        Object result = theTestSubject.doSomethingThatUsesTheMock();
+
+        assertThat(result, is("what you expected"));
+
+        // Verify all mocks is done automatically
+    }
+}}}
