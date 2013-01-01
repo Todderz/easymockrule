@@ -1,8 +1,6 @@
 #summary Basic usage instructions.
 
-= Introduction =
-
-You no longer need to create mocks, inject them into the test subject, or verify them manually.
+You no longer need to create mocks, inject them into the test subject, or verify them manually. Instead, a JUnitRule, annotations to label mocks, and an annotation to identify the test subject is all you need.
 
 = Example =
 
