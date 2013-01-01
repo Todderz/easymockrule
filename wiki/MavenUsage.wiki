@@ -2,7 +2,7 @@
 
 = Maven Dependency =
 
-EasyMockRule is published in central.
+!EasyMockRule is published in central.
 
 Add this dependency to your pom:
 
