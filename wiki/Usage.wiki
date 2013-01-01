@@ -16,13 +16,13 @@ You no longer need to create mocks, inject them into the test subject, or verify
 public class SomeTest {
 
     @Rule
-    public EasyMockRule mocks = new EasyMockRule(this);
+    public EasyMockRule mocks = new EasyMockRule(this); // Give the rule a reference to the test class
 
     @StrictMock
-    public SomeThing aMockedThing;
+    private SomeThing aMockedThing; // Or use @Mock or @NiceMock as needed
 
     @TestSubject
-    public SomeOtherThing theTestSubject;
+    private SomeOtherThing theTestSubject;  // No need to create instance if it has a no-arg constructor
 
     @Test
     public void shouldDoSomething() throws Exception {
@@ -41,7 +41,7 @@ public class SomeTest {
 
         assertThat(result, is("what you expected"));
 
-        // Verify all mocks is done automatically
+        // "Verify" is done automatically for all mocks
     }
 }
 }}}
