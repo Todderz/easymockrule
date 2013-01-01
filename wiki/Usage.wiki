@@ -7,7 +7,27 @@ You no longer need to create mocks, inject them into the test subject, or verify
 
 = Details =
 
+You have to:
+#  Add the !EasyMockRule
+#  Label fields that should be mocked
+#  Label the test subject
+#  Call replayAll() at the appropriate point
 
+You should:
+#  name the mocked fields the same as the target field in !TestSubject - injection first tries to wire by name, then by type. Name is faster, but it would be easy to break when refactoring, so by type is there as a back-up
+
+You do not have to:
+#  Create mocks
+#  Set mocks into where they are needed
+#  Remember to call replay on each mock
+#  Call verify. Ever.
+#  Create an instance of the test subject if it has a no-arg constructor
+
+You may:
+#  Mix @Mock, @NiceMock and @StrictMock as required
+#  Have multiple @TestSubject
+#  Have mocks and test subjects in base classes
+#  Mock interfaces or classes or both, without having to manually faff about with classextension
 
 
 = Example =
@@ -45,3 +65,32 @@ public class SomeTest {
     }
 }
 }}}
+
+Let's see that example again without the clutter of explanatory comments:
+{{{
+public class SomeTest {
+
+    @Rule
+    public EasyMockRule mocks = new EasyMockRule(this); 
+
+    @StrictMock
+    private SomeThing aMockedThing;
+
+    @TestSubject
+    private SomeOtherThing theTestSubject;
+
+    @Test
+    public void shouldDoSomething() throws Exception {
+
+        expect(aMockedThing.doStuff()).andReturn("stuff").atLeastOnce();
+
+        mocks.replayAll();
+
+        Object result = theTestSubject.doSomethingThatUsesTheMock();
+
+        assertThat(result, is("what you expected"));
+    }
+}
+}}}
+
+See how much mocking related clutter has gone? 
