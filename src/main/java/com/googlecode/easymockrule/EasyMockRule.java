@@ -29,11 +29,11 @@ import org.junit.runners.model.Statement;
  * JUnit Rule that automates the creation, injection, and verification of mocks
  * for EasyMock. The instance of EasyMocks must be public and annotated with
  * &#64;Rule. Mocks must be annotated with one of the mock annotations from this
- * class, must be public, and should not be initialised - this rule will create
- * them for you. Annotate a class with &#64;EasyMocks.TestSubject and the mocks
- * will be injected automatically. Wiring is attempted first by field name if
- * the field name of your mock in your test class matches the field name in the
- * TestSubject. If that fails, wiring by type will be attempted.
+ * package, and should not be initialised - this rule will create them for you.
+ * Annotate a class with &#64;TestSubject and the mocks will be injected
+ * automatically. Wiring is attempted first by field name if the field name of
+ * your mock in your test class matches the field name in the TestSubject. If
+ * that fails, wiring by type will be attempted.
  * 
  * @author Alistair Todd <ringracer@gmail.com>
  */
@@ -112,15 +112,16 @@ public class EasyMockRule implements TestRule {
 		while (isUserDefined(currentClass)) {
 			injectMocksForCurrentClass(currentClass);
 			currentClass = currentClass.getSuperclass();
-		} 
+		}
 	}
 
 	private boolean isUserDefined(Class<?> currentClass) {
 		return currentClass != Object.class;
 	}
 
-	private void injectMocksForCurrentClass(Class<?> currentClass) throws Exception {
-		
+	private void injectMocksForCurrentClass(Class<?> currentClass)
+			throws Exception {
+
 		for (Field f : currentClass.getDeclaredFields()) {
 
 			if (f.isAnnotationPresent(Mock.class)) {
