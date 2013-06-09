@@ -124,6 +124,8 @@ However, if you give the mock a name upon creation, then you get a more meaningf
 	userAccountDao.findAll(): expected: 2, actual: 1
 }}}
 
+Now it's easy to see that the mock in question is the "userAccountDao" field, so you can quickly find references to that mock and track down where it is being used.
+
 !EasyMockRule automatically names the mocks for you, using the field name. So using !EasyMockRule is easier _and_ better!
 
 
