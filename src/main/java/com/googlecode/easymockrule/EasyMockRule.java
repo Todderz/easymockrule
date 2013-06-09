@@ -16,11 +16,14 @@
 package com.googlecode.easymockrule;
 
 import static com.googlecode.easymockrule.InjectionUtils.inject;
+import static com.googlecode.easymockrule.InjectionUtils.isUserDefined;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hamcrest.Matcher;
+import org.hamcrest.integration.EasyMock2Adapter;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -52,6 +55,18 @@ public class EasyMockRule implements TestRule {
 	 */
 	public EasyMockRule(Object testClass) {
 		this.testClass = testClass;
+	}
+
+	/**
+	 * Register a Hamcrest matcher, allowing it to be used in EasyMock
+	 * expectations.
+	 * 
+	 * @param matcher
+	 * @return
+	 */
+	public static <T> T with(Matcher<T> matcher) {
+		EasyMock2Adapter.adapt(matcher);
+		return null;
 	}
 
 	@Override
@@ -115,12 +130,7 @@ public class EasyMockRule implements TestRule {
 		}
 	}
 
-	private boolean isUserDefined(Class<?> currentClass) {
-		return currentClass != Object.class;
-	}
-
-	private void injectMocksForCurrentClass(Class<?> currentClass)
-			throws Exception {
+	private void injectMocksForCurrentClass(Class<?> currentClass) throws Exception {
 
 		for (Field f : currentClass.getDeclaredFields()) {
 
@@ -148,7 +158,112 @@ public class EasyMockRule implements TestRule {
 		inject(testSubjects, mock, f.getName());
 	}
 
+	/**
+	 * Replay all mocks. Note that verify is called automatically by the Rule.
+	 */
 	public void replayAll() {
 		mocks.replayAll();
+	}
+
+	/**
+	 * Register a mock to be managed by this instance for verifyAll etc.
+	 * 
+	 * @param mock
+	 */
+	public void registerMock(Object mock) {
+		mocks.registerMock(mock);
+	}
+
+	/**
+	 * Remove a mock from the list being managed.
+	 * 
+	 * @param mock
+	 */
+	public void deregisterMock(Object mock) {
+		mocks.deregisterMock(mock);
+	}
+
+	/**
+	 * Create a Mock that will be managed by the rule, ie just like using
+	 * "@Mock".
+	 * 
+	 * @param name
+	 *            Must be a valid java identifier eg no periods
+	 * @param toMock
+	 *            may be class or interface
+	 * @return
+	 */
+	public <T> T createMock(String name, Class<T> toMock) {
+		return mocks.createMock(name, toMock);
+	}
+
+	/**
+	 * Create a NiceMock that will be managed by the rule, ie just like using
+	 * "@NiceMock".
+	 * 
+	 * @param name
+	 *            Must be a valid java identifier eg no periods
+	 * @param toMock
+	 *            may be class or interface
+	 * @return
+	 */
+	public <T> T createNiceMock(String name, Class<T> toMock) {
+		return mocks.createNiceMock(name, toMock);
+	}
+
+	/**
+	 * Create a StrictMock that will be managed by the rule, ie just like using
+	 * "@StrictMock".
+	 * 
+	 * @param name
+	 *            Must be a valid java identifier eg no periods
+	 * @param toMock
+	 *            may be class or interface
+	 * @return
+	 */
+	public <T> T createStrictMock(String name, Class<T> toMock) {
+		return mocks.createStrictMock(name, toMock);
+	}
+
+	/**
+	 * Create a Mock that will be managed by the rule, ie just like using
+	 * "@Mock", with a name that will be derived from class.getName().
+	 * 
+	 * @param toMock
+	 *            may be class or interface
+	 * @return
+	 * @deprecated Use createMock(String name, Class<T> toMock)
+	 */
+	@Deprecated
+	public <T> T createMock(Class<T> toMock) {
+		return mocks.createMock(toMock);
+	}
+
+	/**
+	 * Create a NiceMock that will be managed by the rule, ie just like using
+	 * "@NiceMock", with a name that will be derived from class.getName().
+	 * 
+	 * @param toMock
+	 *            may be class or interface
+	 * @return
+	 * @deprecated Use createNiceMock(String name, Class<T> toMock)
+	 */
+	@Deprecated
+	public <T> T createNiceMock(Class<T> toMock) {
+		return mocks.createNiceMock(toMock);
+	}
+
+	/**
+	 * Create a StrictMock that will be managed by the rule, ie just like using
+	 * "@StrictMock", with a name that will be derived from class.getName().
+	 * 
+	 * @param toMock
+	 *            may be class or interface
+	 * @return
+	 * @deprecated Use createStrictMock(String name, Class<T> toMock)
+	 */
+	@Deprecated
+	public <T> T createStrictMock(Class<T> toMock) {
+		return mocks.createStrictMock(toMock);
 	}
 }

@@ -1,83 +1,295 @@
+/*
+ * Copyright 2012-2013 Alistair Todd
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.googlecode.easymockrule;
 
-import static java.util.Arrays.asList;
+import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 
-import java.util.List;
-
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
+import org.easymock.internal.MocksControl;
+import org.easymock.internal.RecordState;
+import org.easymock.internal.ReplayState;
 import org.junit.Rule;
 import org.junit.Test;
 
+/**
+ * Unit tests for EasyMockRule.
+ * 
+ * @author Alistair Todd <ringracer@gmail.com>
+ */
+public class EasyMockRuleTest extends EasyMockRuleTestBase {
 
-import com.googlecode.easymockrule.EasyMockRule;
-import com.googlecode.easymockrule.NiceMock;
-import com.googlecode.easymockrule.StrictMock;
-import com.googlecode.easymockrule.TestSubject;
-import com.googlecode.easymockrule.EasyMockRuleTest.Thing;
+	private String expected = "expected";
 
-public class EasyMockRuleTest extends EasyMockRuleExampleBase{
+	@Rule
+	public EasyMockRule mocks = new EasyMockRule(this);
 
-    @Rule
-    public EasyMockRule mocks = new EasyMockRule(this);
+	@StrictMock
+	private InterfaceMock interfaceMock;
 
-    @StrictMock
-    public OneDAO nameThatWontBeWiredByName;
+	@NiceMock
+	public ClassMock classMock;
 
-    @TestSubject
-    public EasyMocksTestComponent thingThatCallsTheMockDao;
+	@StrictMock
+	private WiredByTypeMock nameToCauseWiringByType;
 
-    @Test
-    public void shouldUseMocksWithoutAllTheClutter() throws Exception {
+	@NiceMock
+	private WiredInTestSubjectSuperClassMock wiredInTestSubjectSuperClassMock;
 
-        String expected1 = "Name 1";
-        String expected2 = "Name 2";
+	@Mock
+	private WiredInTestSubjectSuperClassByTypeMock nameToCauseWiringInTestSubjectSuperClassByType;
 
-        expect(nameThatWontBeWiredByName.getListOfThings()).andReturn(asList(new Thing(expected1),new Thing(expected2))).atLeastOnce();
-        expect(classDAO.getOneThing()).andReturn(new Thing(expected2)).atLeastOnce();
+	@TestSubject
+	public EasyMockTestSubject testSubject;
 
-        mocks.replayAll();
+	@Test
+	public void shouldCreateAndInjectInterfaceMocks() throws Exception {
 
-        List<Thing> allThings = thingThatCallsTheMockDao.useDependencyOne();
+		expect(interfaceMock.getOneThing()).andReturn(new Thing(expected)).atLeastOnce();
 
-        assertThat(allThings, hasSize(2));
-        assertThat(allThings, hasItem(hasProperty("name", equalTo(expected1))));
-        assertThat(allThings, hasItem(hasProperty("name", equalTo(expected2))));
-        
-        Thing oneThing = thingThatCallsTheMockDao.useDependencyTwo();
-        assertThat(oneThing, hasProperty("name", equalTo(expected2)));
-    }
+		mocks.replayAll();
 
-    private Matcher<? super List<Thing>> hasItem(Matcher<Object> hasProperty) {
-        return Matchers.<Thing> hasItem(hasProperty);
-    }
+		Thing result = testSubject.useInterfaceMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
 
-    public class Thing {
+	@Test
+	public void shouldCreateStrictMocks() throws Exception {
+		assertThat(EasyMockUtils.getMockType(interfaceMock), is("STRICT"));
+	}
 
-        private String name;
+	@Test
+	public void shouldCreateNiceMocks() throws Exception {
+		assertThat(EasyMockUtils.getMockType(wiredInTestSubjectSuperClassMock), is("NICE"));
+	}
 
-        public Thing(String name) {
-            this.name = name;
-        }
+	@Test
+	public void shouldCreateDefaultMocks() throws Exception {
+		assertThat(EasyMockUtils.getMockType(nameToCauseWiringInTestSubjectSuperClassByType), is("DEFAULT"));
+	}
 
-        public String getName() {
-            return name;
-        }
-    }
+	@Test
+	public void shouldInjectMocksToPrivateFields() throws Exception {
 
-    public interface OneDAO {
-        public List<Thing> getListOfThings();
-    }
+		expect(interfaceMock.getOneThing()).andReturn(new Thing(expected)).atLeastOnce();
 
-    public class TwoDAO {
+		mocks.replayAll();
+
+		Thing result = testSubject.useInterfaceMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldInjectByTypeWhenNameDoesntMatchField() throws Exception {
+
+		expect(nameToCauseWiringByType.getOneThing()).andReturn(new Thing(expected)).atLeastOnce();
+
+		mocks.replayAll();
+
+		Thing result = testSubject.useWiredByTypeMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldCreateAndInjectClassMocks() throws Exception {
+
+		expect(classMock.getOneThing()).andReturn(new Thing(expected)).atLeastOnce();
+
+		mocks.replayAll();
+
+		Thing result = testSubject.useClassMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldCreateAndInjectMocksDefinedInTestClassSuperClass() throws Exception {
+
+		expect(classMock.getOneThing()).andReturn(new Thing(expected)).atLeastOnce();
+
+		mocks.replayAll();
+
+		Thing result = testSubject.useClassMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldWireMocksInTestSubjectSuperClassByName() throws Exception {
+
+		expect(wiredInTestSubjectSuperClassMock.getOneThing()).andReturn(new Thing(expected)).atLeastOnce();
+
+		mocks.replayAll();
+
+		Thing result = testSubject.useWiredInTestSubjectSuperClassMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldWireMocksInTestSubjectSuperClassByTypeWhenNameDoesntMatchField() throws Exception {
+
+		expect(nameToCauseWiringInTestSubjectSuperClassByType.getOneThing()).andReturn(new Thing(expected))
+				.atLeastOnce();
+
+		mocks.replayAll();
+
+		Thing result = testSubject.useWiredInTestSubjectSuperClassByTypeMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldAllowMocksToBeCreatedExternally() throws Exception {
+
+		// Manually create and inject the mock
+		ManualMock manuallyCreatedMock = createMock(ManualMock.class);
+		testSubject.setManualMock(manuallyCreatedMock);
+
+		// Confirm that the mock is in record state
+		MocksControl interfaceMockControl = EasyMockUtils.getMockControl(manuallyCreatedMock);
+		assertThat(interfaceMockControl.getState(), instanceOf(RecordState.class));
+
+		expect(manuallyCreatedMock.getOneThing()).andReturn(new Thing(expected)).times(1);
+
+		// Register the mock and use the Rule to switch it to reply
+		mocks.registerMock(manuallyCreatedMock);
+		mocks.replayAll();
+
+		// Confirm that the mock has been switched into replay by the Rule
+		assertThat(interfaceMockControl.getState(), instanceOf(ReplayState.class));
+
+		// Check it actually works, just for fun
+		Thing result = testSubject.useManuallySetMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldAllowMocksToBeCreatedWithoutAnnotations() throws Exception {
+
+		ManualMock assistedCreationMock = mocks.createMock("somename", ManualMock.class);
+
+		// Confirm that the mock is in record state
+		MocksControl assistedCreationMockControl = EasyMockUtils.getMockControl(assistedCreationMock);
+		assertThat(assistedCreationMockControl.getState(), instanceOf(RecordState.class));
+
+		EasyMockTestSubject thingThatCallsTheMocks = new EasyMockTestSubject();
+		thingThatCallsTheMocks.setManualMock(assistedCreationMock);
+
+		expect(assistedCreationMock.getOneThing()).andReturn(new Thing(expected)).times(1);
+
+		mocks.replayAll();
+
+		// Confirm that the mock has been switched into replay by the Rule
+		assertThat(assistedCreationMockControl.getState(), instanceOf(ReplayState.class));
+
+		Thing result = thingThatCallsTheMocks.useManuallySetMock();
+		assertThat(result, hasProperty("name", equalTo(expected)));
+	}
+
+	@Test
+	public void shouldMakeNamesSafeWhenAssistingMockCreation() throws Exception {
+
+		ManualMock assistedCreationMock = mocks.createMock("some.illegal.name", ManualMock.class);
+
+		assertThat(assistedCreationMock.toString(), is("some_illegal_name"));
+	}
+
+	/**
+	 * Just a simple class we can use when mocking methods.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public class Thing {
+
+		private String name;
+
+		public Thing(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
+	/**
+	 * An interface that we will mock with EasyMockRule.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public interface InterfaceMock {
+		public Thing getOneThing();
+	}
+
+	/**
+	 * An interface for which we will manually create a mock.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public interface ManualMock {
+		public Thing getOneThing();
+	}
+
+	/**
+	 * An interface that we will mock with EasyMockRule and inject by type.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public interface WiredByTypeMock {
+		public Thing getOneThing();
+	}
+
+	/**
+	 * A class that we will mock with EasyMockRule.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public class ClassMock {
 		public Thing getOneThing() {
 			return null;
 		}
 	}
 
+	/**
+	 * A class that we will mock with EasyMockRule from an annotated declaration in the test case base class.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public class DeclaredInTestCaseSuperClassMock {
+		public Thing getOneThing() {
+			return null;
+		}
+	}
+
+	/**
+	 * An interface that we will mock with EasyMockRule and inject by name into the TestSubject's base class.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public interface WiredInTestSubjectSuperClassMock {
+		public Thing getOneThing();
+	}
+
+	/**
+	 * An interface that we will mock with EasyMockRule and inject by type into the TestSubject's base class.
+	 * 
+	 * @author Alistair Todd <ringracer@gmail.com>
+	 */
+	public interface WiredInTestSubjectSuperClassByTypeMock {
+		public Thing getOneThing();
+	}
 }
