@@ -1,4 +1,4 @@
-#summary Working with Hamcrest in !EasyMock.
+#summary Working with Hamcrest in EasyMock.
 
 
 = Hamcrest Matchers in !EasyMock Expectation Setters =
