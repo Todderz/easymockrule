@@ -134,7 +134,7 @@ Now it's easy to see that the mock in question is the "userAccountDao" field, so
 
 Annotation scanning:
   # @!TestSubject may appear in the test case class or a super class.
-  # @Mock, @NiceMock and and @StrictMock may also appear anywhere in the test case class or its super classes.
+  # @Mock, @!NiceMock and and @!StrictMock may also appear anywhere in the test case class or its super classes.
 
 Injection Capabilities:
   # Mocks can be injected to private fields
