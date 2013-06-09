@@ -27,3 +27,14 @@ There are also versions that will create a name for the mock using the class nam
 = Manual Creation =
 
 In some cases you may wish to create a mock yourself, but would like !EasyMockRule to manage it for you.
+
+Use the "registerMock" and "deregisterMock" to place a mock under the control of the rule, eg:
+
+{{{
+ 
+    // Register the mock for automatic management
+    mocks.registerMock(manuallyCreatedMock);
+ 
+}}}
+
+Now the manually created mock will be managed by the "replayAll()" method and automatically verified, but will not be automatically named or injected into the !TestSubject.
