@@ -1,7 +1,7 @@
 #summary Working with Hamcrest.
 
 
-= Hamcrest Matchers in EasyMock Expectation Setters =
+= Hamcrest Matchers in !EasyMock Expectation Setters =
 
 When defining expectation setters in !EasyMock, you can use Hamcrest matchers as argument matchers by adapting a given Hamcrest matcher into an !EasyMock matcher.
 
