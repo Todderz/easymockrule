@@ -97,7 +97,7 @@ See how much mocking related clutter has gone?
 
 Using !EasyMockRule and the annotations for !EasyMock means that:
 
-  # you spend a lot less time writing your test code.
+  # You spend a lot less time writing your test code.
   # You don't have to create mocks.
   # You don't have to call setters on the test subject.
   # You can't forget to verify a mock.
