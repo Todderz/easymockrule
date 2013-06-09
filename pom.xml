@@ -10,15 +10,15 @@
 	<groupId>com.googlecode.easymockrule</groupId>
 	<artifactId>EasyMockRule</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2</version>
+	<version>0.3-SNAPSHOT</version>
 
 	<name>EasyMockRule</name>
 	<description>JUnit Rule for annotation-driven EasyMock</description>
 	<url>http://code.google.com/p/easymockrule/</url>
 	<scm>
-		<url>http://easymockrule.googlecode.com/svn/tags/EasyMockRule-0.2</url>
-		<connection>scm:svn:https://easymockrule.googlecode.com/svn/tags/EasyMockRule-0.2</connection>
-		<developerConnection>scm:svn:https://easymockrule.googlecode.com/svn/tags/EasyMockRule-0.2</developerConnection>
+		<url>http://easymockrule.googlecode.com/svn/</url>
+		<connection>scm:svn:https://easymockrule.googlecode.com/svn/trunk/</connection>
+		<developerConnection>scm:svn:https://easymockrule.googlecode.com/svn/trunk/</developerConnection>
 	</scm>
 	<developers>
 		<developer>
