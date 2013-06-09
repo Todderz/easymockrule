@@ -9,7 +9,7 @@ EasyMockRule provides the "createMock", "createNiceMock" and "createStrictMock" 
 
 The mock will not be injected into the TestSubject, but will be managed by the "replayAll()" method and automatically verified.
 
-There are also versions that will create a name for the mock using the class name, but you should prefer to give a meaningful name for the mock that will make sense when seen in assertion failure messages:
+There are also versions that will create a name for the mock using the class name, but you should prefer to give a meaningful name for the mock that will make sense when seen in expectation failure messages:
 
 {{{
     mocks.createMock("name for your mock", SomeType.class);
