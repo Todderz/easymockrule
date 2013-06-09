@@ -26,3 +26,5 @@ Or, use your own custom matcher, like this:
         return your-custom-matcher...
     }
 }}}
+
+This is a remarkably powerful way to handle complicated matching in expectation setters to achieve tests that are precisely as specific as they need to be, not over-specific (and therefore brittle) not under-specific (and therefore flimsy), whilst maintaining fluency and readability.
