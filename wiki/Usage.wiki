@@ -91,3 +91,20 @@ public class SomeTest {
 }}}
 
 See how much mocking related clutter has gone? 
+
+
+= Technical Notes =
+
+Annotation scanning:
+  # @TestSubject may appear in the test case class or a super class.
+  # @Mock, @NiceMock and and @StrictMock may also appear anywhere in the test case class or its super classes.
+
+Injection Capabilities:
+  # Mocks can be injected to private fields
+  # Mocks will be injected into any @TestSubjects by:
+  ## Finding a matching field name in the class or a superclass, or if not found
+  ## Finding a field with a suitable type in the class or a superclass
+
+Mocking capabilities:
+  # Classes and interfaces can be mocked
+
