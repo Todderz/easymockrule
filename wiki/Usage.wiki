@@ -93,6 +93,41 @@ public class SomeTest {
 See how much mocking related clutter has gone? 
 
 
+= The Advantages of Automated Mocking =
+
+Using !EasyMockRule and the annotations for !EasyMock means that:
+
+  # you spend a lot less time writing your test code.
+  # You don't have to create mocks.
+  # You don't have to call setters on the test subject.
+  # You can't forget to verify a mock.
+  # You don't have to handle the differences in mocking classes versus interfaces.
+  # It is immediately clear when reading a test class that a given field is a mock because the annotation states it.
+  # Expectation errors are easier to diagnose thanks to automatic naming of the mocks.
+
+== Automatic Naming and Expectation Errors ==
+
+When an expectation error occurs, you'll see an error message like this:
+
+{{{
+
+    Expectation failure on verify:
+	findAll(): expected: 2, actual: 1
+}}}
+
+When you have a number of mocks and a large test class, it can take a while to track down the mock to which that failure relates.
+
+However, if you give the mock a name upon creation, then you get a more meaningful message:
+
+{{{
+    Expectation failure on verify:
+	userAccountDao.findAll(): expected: 2, actual: 1
+}}}
+
+!EasyMockRule automatically names the mocks for you, using the field name. So using !EasyMockRule is easier _and_ better!
+
+
+
 = Technical Notes =
 
 Annotation scanning:
@@ -107,4 +142,3 @@ Injection Capabilities:
 
 Mocking capabilities:
   # Classes and interfaces can be mocked
-
