@@ -25,77 +25,133 @@ import java.util.List;
  */
 public class InjectionUtils {
 
-    /**
-     * Inject candidate into the first matching target with a field of same type, or matching name
-     * given by fieldName. Targets are scanned in order. First attempt to inject by name, then by
-     * type. Returns as soon as an injection succeeds.
-     * 
-     * @param targets
-     * @param candidate
-     * @param fieldName
-     * @throws Exception
-     */
-    public static void inject(List<Object> targets, Object candidate, String fieldName) throws Exception {
+	private InjectionUtils() {
+		// Hide utility class constructor
+	}
 
-        for (Object target : targets) {
+	/**
+	 * Inject candidate into the first matching target with a field of same
+	 * type, or matching name given by fieldName. Targets are scanned in order.
+	 * First attempt to inject by name, then by type. Returns as soon as an
+	 * injection succeeds.
+	 * 
+	 * @param targets
+	 * @param candidate
+	 * @param fieldName
+	 * @throws Exception
+	 */
+	public static void inject(List<Object> targets, Object candidate, String fieldName) throws Exception {
 
-            if (injectByName(target, candidate, fieldName)) {
-                return;
-            }
+		for (Object target : targets) {
 
-            if (injectByType(target, candidate)) {
-                return;
-            }
-        }
-    }
+			if (injectByName(target, candidate, fieldName)) {
+				return;
+			}
 
-    /**
-     * Inject candidate into target where target has a field matching the type of candidate.
-     * 
-     * @param target
-     * @param candidate
-     * @return
-     */
-    public static boolean injectByType(Object target, Object candidate) {
+			if (injectByType(target, candidate)) {
+				return;
+			}
+		}
+	}
 
-        for (Field testSubjectField : target.getClass().getDeclaredFields()) {
+	/**
+	 * Inject candidate into target where target has a field matching the
+	 * fieldName.
+	 * 
+	 * @param testSubject
+	 * @param candidate
+	 * @param fieldName
+	 * @return
+	 */
+	public static boolean injectByName(Object testSubject, Object candidate, String fieldName) {
 
-            Class<?> targetFieldType = testSubjectField.getType();
-            Class<?> candidateType = candidate.getClass();
+		try {
+			Field testSubjectField = findField(testSubject.getClass(), fieldName);
+			testSubjectField.setAccessible(true);
+			testSubjectField.set(testSubject, candidate);
 
-            if (targetFieldType.isAssignableFrom(candidateType)) {
-                try {
-                    testSubjectField.setAccessible(true);
-                    testSubjectField.set(target, candidate);
-                    return true;
-                } catch (Exception e) {
-                    continue;
-                }
-            }
-        }
+			return true;
 
-        return false;
-    }
+		} catch (Exception e) {
+			return false;
+		}
+	}
 
-    /**
-     * Inject candidate into target where target has a field matching the fieldName.
-     * 
-     * @param testSubject
-     * @param candidate
-     * @param fieldName
-     * @return
-     */
-    public static boolean injectByName(Object testSubject, Object candidate, String fieldName) {
+	// Work up through super classes looking for the named field.
+	private static Field findField(Class<?> currentClass, String fieldName) throws Exception {
 
-        try {
-            Field testSubjectField = testSubject.getClass().getDeclaredField(fieldName);
-            testSubjectField.setAccessible(true);
-            testSubjectField.set(testSubject, candidate);
+		while (isUserDefined(currentClass)) {
 
-            return true;
+			try {
+				Field f = currentClass.getDeclaredField(fieldName);
 
-        } catch (Exception e) {
-            return false;
-        }
-    }
+				if (f != null) {
+					return f;
+				}
+
+			} catch (Exception e) {
+				// Ignore
+			} finally {
+				currentClass = currentClass.getSuperclass();
+			}
+		}
+
+		throw new Exception();
+	}
+
+	/**
+	 * Is this given class a user defined class not a Java library class?
+	 * Actually, we just check that this class is not Object.class, because
+	 * that's generally going to be good enough and not difficult.
+	 * 
+	 * @param candidateClass
+	 *            class to check
+	 * @return true if currentClass is not Object.
+	 */
+	public static boolean isUserDefined(Class<?> candidateClass) {
+		return candidateClass != Object.class;
+	}
+
+	// Inject candidate into target where target has a field matching the type
+	// of candidate, working up through super classes until we find a match.
+	private static boolean injectByType(Object startingPoint, Object candidate) {
+
+		Class<?> currentClass = startingPoint.getClass();
+
+		while (isUserDefined(currentClass)) {
+
+			if (wireByType(startingPoint, candidate, currentClass)) {
+				return true;
+			}
+
+			currentClass = currentClass.getSuperclass();
+		}
+
+		return false;
+	}
+
+	// Try to find a field in the given class with a type that allows the candidate to be set.
+	private static boolean wireByType(Object startingPoint, Object candidate, Class<?> currentClass) {
+
+		for (Field testSubjectField : currentClass.getDeclaredFields()) {
+
+			Class<?> targetFieldType = testSubjectField.getType();
+			Class<?> candidateType = candidate.getClass();
+
+			if (targetFieldType.isAssignableFrom(candidateType)) {
+				try {
+					testSubjectField.setAccessible(true);
+					testSubjectField.set(startingPoint, candidate);
+
+					return true;
+
+				} catch (Exception e) {
+					continue;
+				}
+			}
+		}
+
+		return false;
+	}
+	
 }
