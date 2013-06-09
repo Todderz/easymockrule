@@ -7,7 +7,7 @@ When defining expectation setters in !EasyMock, you can use Hamcrest matchers as
 
 !EasyMockRule provides a convenience method to make it very easy to do this, and to leave your test code very clean.
 
-Use the "EasyMockRule.with(Matcher matcher)" method. This is a static method so use a static import to leave your code fluent and clean.
+Use the "!EasyMockRule.with(Matcher matcher)" method. This is a static method so use a static import to leave your code fluent and clean.
 
 Eg, use a standard Hamcrest matcher as an !EasyMock argument matcher like so:
 
