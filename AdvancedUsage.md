@@ -1,0 +1,39 @@
+# Assisted Creation #
+
+In some cases you need to create a mock on the fly during test execution, not as an annotated class field.
+
+EasyMockRule provides the "createMock", "createNiceMock" and "createStrictMock" methods to create a mock on-demand.
+
+The mock will not be injected into the TestSubject, but will be managed by the "replayAll()" method and automatically verified.
+
+There are also versions that will create a name for the mock using the class name, but you should prefer to give a meaningful name for the mock that will make sense when seen in expectation failure messages:
+
+```
+    mocks.createMock("name for your mock", SomeType.class);
+ 
+    // or
+ 
+    mocks.createNiceMock("name for your mock", SomeType.class);
+ 
+    // or
+ 
+    mocks.createStrictMock("name for your mock", SomeType.class);
+```
+
+
+# Manual Creation #
+
+In some cases you may wish to create a mock yourself, but would like EasyMockRule to manage it for you.
+
+Use the "registerMock" and "deregisterMock" to place a mock under the control of the rule, eg:
+
+```
+ 
+    // Register the mock for automatic management
+    mocks.registerMock(manuallyCreatedMock);
+ 
+```
+
+Now the manually created mock will be managed by the "replayAll()" method and automatically verified, but will not be automatically named or injected into the TestSubject.
+
+Note that as of version 0.2 this only supports interface mocks.

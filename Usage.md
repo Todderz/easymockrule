@@ -1,0 +1,144 @@
+You no longer need to create mocks, inject them into the test subject, or verify them manually. Instead, a JUnitRule, annotations to label mocks, and an annotation to identify the test subject is all you need.
+
+# Example #
+
+```
+public class SomeTest {
+
+    @Rule
+    public EasyMockRule mocks = new EasyMockRule(this); // Give the rule a reference to the test class
+
+    @StrictMock
+    private SomeThing aMockedThing; // Or use @Mock or @NiceMock as needed
+
+    @TestSubject
+    private SomeOtherThing theTestSubject;  // No need to create instance if it has a no-arg constructor
+
+    @Test
+    public void shouldDoSomething() throws Exception {
+
+        // No need to create mocks
+
+        // No need to set mocks into the test subject
+
+        // Set expectations just like normal
+        expect(aMockedThing.doStuff()).andReturn("stuff").atLeastOnce();
+
+        // Only ever need this one call to replay any mocks in this test class
+        mocks.replayAll();
+
+        Object result = theTestSubject.doSomethingThatUsesTheMock();
+
+        assertThat(result, is("what you expected"));
+
+        // "Verify" is done automatically for all mocks
+    }
+}
+```
+
+# Details #
+
+You have to:
+  1. Add the EasyMockRule
+  1. Label fields that should be mocked
+  1. Label the test subject
+  1. Call replayAll() at the appropriate point
+
+You should:
+  1. Name the mocked fields the same as the target field in TestSubject - injection first tries to wire by name, then by type. Name is faster, but it would be easy to break when refactoring, so by type is there as a back-up
+  1. Generally prefer @NiceMock when supplying indirect inputs, and @StrictMock when verifying indirect outputs. See XUnit Test Patterns.
+
+You do not have to:
+  1. Create mocks
+  1. Set mocks into where they are needed
+  1. Remember to call replay on each mock
+  1. Call verify. Ever.
+  1. Create an instance of the test subject if it has a no-arg constructor
+
+You may:
+  1. Mix @Mock, @NiceMock and @StrictMock as required
+  1. Have multiple @TestSubject
+  1. Have mocks and test subjects in base classes
+  1. Mock interfaces or classes or both, without having to manually faff about with classextension
+
+Let's see that example again without the clutter of explanatory comments:
+```
+public class SomeTest {
+
+    @Rule
+    public EasyMockRule mocks = new EasyMockRule(this); 
+
+    @StrictMock
+    private SomeThing aMockedThing;
+
+    @TestSubject
+    private SomeOtherThing theTestSubject;
+
+    @Test
+    public void shouldDoSomething() throws Exception {
+
+        expect(aMockedThing.doStuff()).andReturn("stuff").atLeastOnce();
+
+        mocks.replayAll();
+
+        Object result = theTestSubject.doSomethingThatUsesTheMock();
+
+        assertThat(result, is("what you expected"));
+    }
+}
+```
+
+See how much mocking related clutter has gone?
+
+
+# The Advantages of Automated Mocking #
+
+Using EasyMockRule and the annotations for EasyMock means that:
+
+  1. You spend a lot less time writing your test code.
+  1. You don't have to create mocks.
+  1. You don't have to call setters on the test subject.
+  1. You can't forget to verify a mock.
+  1. You don't have to handle the differences in mocking classes versus interfaces.
+  1. It is immediately clear when reading a test class that a given field is a mock because the annotation states it.
+  1. Expectation errors are easier to diagnose thanks to automatic naming of the mocks.
+
+## Automatic Naming and Expectation Errors ##
+
+When an expectation error occurs, you'll see an error message like this:
+
+```
+
+    Expectation failure on verify:
+	findAll(): expected: 2, actual: 1
+```
+
+When you have a number of mocks and a large test class, it can take a while to track down the mock to which that failure relates.
+
+However, if you give the mock a name upon creation, then you get a more meaningful message:
+
+```
+    Expectation failure on verify:
+	userAccountDao.findAll(): expected: 2, actual: 1
+```
+
+Now it's easy to see that the mock in question is the "userAccountDao" field, so you can quickly find references to that mock and track down where it is being used.
+
+EasyMockRule automatically names the mocks for you, using the field name. So using EasyMockRule is easier _and_ better!
+
+
+
+# Technical Notes #
+
+Annotation scanning:
+  1. @TestSubject may appear in the test case class or a super class.
+  1. @Mock, @NiceMock and and @StrictMock may also appear anywhere in the test case class or its super classes.
+
+Injection Capabilities:
+  1. Mocks can be injected to private fields
+  1. Mocks will be injected into any @TestSubjects by:
+  1. Finding a matching field name in the class or a superclass, or if not found
+  1. Finding a field with a suitable type in the class or a superclass
+
+Mocking capabilities:
+  1. Classes and interfaces can be mocked
